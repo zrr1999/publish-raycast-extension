@@ -87,6 +87,6 @@ runs:
         committer: ${{ inputs.committer }}
         author: ${{ inputs.committer }}
         branch: ${{ inputs.extension-name }}
-        title: ${{ env.IS_FIRST_COMMIT == 'true' && 'Add gitmoji-commit extension' || 'Update gitmoji-commit extension' }}
+        title: ${{ env.IS_FIRST_COMMIT == 'true' && 'Add ${{ inputs.extension-name }} extension' || 'Update ${{ inputs.extension-name }} extension' }}
         body-path: ../PR-BODY.md
         draft: false
