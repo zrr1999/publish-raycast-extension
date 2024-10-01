@@ -56,8 +56,8 @@ runs:
     - name: Generate PR body
       shell: bash
       run: |
-        DESCRIPTION=$(sed 's/^# /### /; s/^## /#### /' ./raycast-extensions/extensions/${{ inputs.extension-name }}/README.md)
-        SCREENCAST=$(find ./raycast-extensions/extensions/${{ inputs.extension-name }}/metadata -name "*.png" -exec echo '![]({})' \; | tr '\n' '\n')
+        DESCRIPTION=$(sed 's/^# /### /; s/^## /#### /' ./extensions/${{ inputs.extension-name }}/README.md)
+        SCREENCAST=$(find ./extensions/${{ inputs.extension-name }}/metadata -name "*.png" -exec echo '![]({})' \; | tr '\n' '\n')
         cat <<EOF > ../PR-BODY.md
         ## Description
         ${DESCRIPTION}
