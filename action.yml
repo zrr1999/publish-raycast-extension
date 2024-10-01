@@ -18,15 +18,15 @@ inputs:
       The committer name and email address in the format `Display Name <email@address.com>`.
       Defaults to the GitHub Actions bot user.
     default: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
-  path:
+  artifact-name:
     description: >
-      The path to the extension. This should be the path to the folder satisifying the specification of raycast extension.
-    default: .
+      The name of the artifact to download.
+    default: raycast-publish
   extension-name:
     description: >
       The name of your extension. This should be lower case, with dashes separating words (e.g. `gitmoji-commit`). 
       This should be the name of the folder under `extensions/` where your extension lives.
-    default: ${{ github.repository }}
+    default: $(basename ${{ github.repository }})
 outputs:
   pull_request_url:
     description: The URL of the pull request to `raycast/extensions`
@@ -34,19 +34,13 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Check out the current repo
-      uses: actions/checkout@v4
-      with:
-        path: ${{ inputs.extension-name }}
     - name: Check out the `raycast/extensions` repo
       uses: actions/checkout@v4
       with:
         repository: raycast/extensions
         token: ${{ inputs.token }}
-        path: raycast-extensions
     - name: Clean original extension
       shell: bash
-      working-directory: raycast-extensions
       run: |
         if [ -d "extensions/${{ inputs.extension-name }}" ]; then
           echo "IS_FIRST_COMMIT=false" >> $GITHUB_ENV
@@ -54,16 +48,17 @@ runs:
         else
           echo "IS_FIRST_COMMIT=true" >> $GITHUB_ENV
         fi
-    - name: Copy extension into the `raycast/extensions` repo
-      run: cp -Rf ./${{ inputs.extension-name }}/${{ inputs.path }}/ ./raycast-extensions/extensions/${{ inputs.extension-name }}/
-      shell: bash
-
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: extensions/${{ inputs.extension-name }}
     - name: Generate PR body
       shell: bash
       run: |
         DESCRIPTION=$(sed 's/^# /### /; s/^## /#### /' ./raycast-extensions/extensions/${{ inputs.extension-name }}/README.md)
         SCREENCAST=$(find ./raycast-extensions/extensions/${{ inputs.extension-name }}/metadata -name "*.png" -exec echo '![]({})' \; | tr '\n' '\n')
-        cat <<EOF > PR-BODY.md
+        cat <<EOF > ../PR-BODY.md
         ## Description
         ${DESCRIPTION}
 
@@ -95,4 +90,3 @@ runs:
         title: ${{ env.IS_FIRST_COMMIT == 'true' && 'Add gitmoji-commit extension' || 'Update gitmoji-commit extension' }}
         body-path: ../PR-BODY.md
         draft: false
-      working-directory: raycast-extensions
