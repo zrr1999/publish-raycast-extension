@@ -79,6 +79,8 @@ runs:
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v7
+      env:
+        EXTENSION_NAME: ${{ inputs.extension-name }}
       with:
         token: ${{ inputs.token }}
         push-to-fork: ${{ inputs.fork-repo }}
@@ -87,6 +89,6 @@ runs:
         committer: ${{ inputs.committer }}
         author: ${{ inputs.committer }}
         branch: ${{ inputs.extension-name }}
-        title: ${{ env.IS_FIRST_COMMIT == 'true' && 'Add ${{ inputs.extension-name }} extension' || 'Update ${{ inputs.extension-name }} extension' }}
+        title: ${{ env.IS_FIRST_COMMIT == 'true' && "Add $EXTENSION_NAME extension" || "Update $EXTENSION_NAME extension" }}
         body-path: ../PR-BODY.md
         draft: false
